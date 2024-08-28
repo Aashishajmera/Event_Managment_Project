@@ -66,7 +66,7 @@ export default function AllEventList() {
     //   for see feedback
       try {
         const response = await axios.post(
-          "http://localhost:3000/event/checkForApplybtn",
+          process.env.REACT_APP_CHECK_FOR_APLY_BTN,
           { _id: event._id}
         );
 
