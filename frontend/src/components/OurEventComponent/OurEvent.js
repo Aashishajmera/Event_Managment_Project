@@ -209,7 +209,7 @@ export default function OurEventComponent() {
       <Suspense fallback={<div>Loading header...</div>}>
         <HeaderComponent />
       </Suspense>
-      {events.length > 0 ? <h2 className="m-3">Event List</h2> : ""}
+      {events.length > 0 ? <h2 className="m-3">Our Event List</h2> : ""}
 
       {events.length === 0 ? (
         <>
