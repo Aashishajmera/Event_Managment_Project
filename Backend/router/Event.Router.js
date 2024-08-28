@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { addEvent, checkEventComplete, deleteEvent, readAllEvent, readOurEvent, updateEvent } from '../controller/Event.Controller.js';
+import { addEvent, checkEventComplete, checkForApplyButton, deleteEvent, readAllEvent, readOurEvent, updateEvent } from '../controller/Event.Controller.js';
 import { body, check } from 'express-validator';
 
 // for env file
@@ -58,3 +58,6 @@ eventRouter.delete(process.env.DELETE_EVENT, deleteEvent);
 
 // CHECK EVENT COMPLETE OR NOT
 eventRouter.post(process.env.CHECK_EVENTCOMPLETE, checkEventComplete);
+
+// CHECK EVENT COMPLETE FOR APPLY BUTTON
+eventRouter.post(process.env.CHECK_FOR_APPLY_BTN, checkForApplyButton);

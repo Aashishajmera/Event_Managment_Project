@@ -107,8 +107,6 @@ export const deleteEvent = async (req, res, next) => {
 
     // =================================FOR SEND MAIL ======================================
 
-    console.log("USER EMAIL LIST FOR THIS EVENT");
-
     // FOR OF LOOP FOR GETTING THE ALL EMAIL IN OBJECT OF ARRAY
     for (const user of userListInEvent) {
       // Prepare email content for event deletion
@@ -119,9 +117,8 @@ export const deleteEvent = async (req, res, next) => {
         text: `
 Dear ${user.username},
 
-We regret to inform you that the "${
-          eventDetails.title
-        }" event, originally scheduled for:
+We regret to inform you that the "${eventDetails.title
+          }" event, originally scheduled for:
 
   - **Date:** ${new Date(eventDetails.date).toDateString()}
   - **Time:** ${eventDetails.time}
@@ -205,8 +202,6 @@ export const updateEvent = async (req, res, next) => {
 
     // =================================FOR SEND MAIL ======================================
 
-    console.log("USER EMAIL LIST FOR THIS EVENT");
-
     // FOR OF LOOP FOR GETTING THE ALL EMAIL IN OBJECT OF ARRAY
     for (const user of userListInEvent) {
       console.log(user.email); // Accesses the email property in each object
@@ -270,35 +265,103 @@ export const checkEventComplete = async (req, res, next) => {
       return res.status(203).json({ msg: "No user found for this event" });
     }
 
+    if (eventDetails[0].eventId.eventComplete === false) {
+      // Get event date and time from the database as Date object
+      const eventDateObj = new Date(eventDetails[0].eventId.date); // Assuming this is a Date object
+      const eventTime = eventDetails[0].eventId.time; // Assume it's in 'hh:mm AM/PM' format
 
-    // Get event date and time from the database as Date object
-    const eventDateObj = new Date(eventDetails[0].eventId.date); // Assuming this is a Date object
-    const eventTime = eventDetails[0].eventId.time; // Assume it's in 'hh:mm AM/PM' format
+      // Get current date and time
+      const currentDate = new Date();
+      const currentDateString = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      const currentTimeString = convertTo12HourFormat(currentDate); // Convert current time to 12-hour format with AM/PM
 
-    // Get current date and time
-    const currentDate = new Date();
-    const currentDateString = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD format
-    const currentTimeString = convertTo12HourFormat(currentDate); // Convert current time to 12-hour format with AM/PM
+      // Format the event date to a string for comparison
+      const eventDateString = eventDateObj.toISOString().split("T")[0]; // Get YYYY-MM-DD format
 
-    // Format the event date to a string for comparison
-    const eventDateString = eventDateObj.toISOString().split("T")[0]; // Get YYYY-MM-DD format
+      // Compare the dates
+      if (currentDateString > eventDateString || currentDateString === eventDateString) {
+        // If dates are the same, compare the times
+        if (isCurrentTimeAfter(eventTime, currentTimeString)) {
 
-    // Compare the dates
-    if (currentDateString > eventDateString) {
-      // If the current date is greater than the event date, the event is complete
-      return res.status(200).json({ msg: "Event is complete", eventDetails });
-    } else if (currentDateString === eventDateString) {
-      // If dates are the same, compare the times
-      if (isCurrentTimeAfter(eventTime, currentTimeString)) {
-        return res.status(200).json({ msg: "Event is complete", eventDetails });
+          try {
+            const updateEvent = await EventModel.findOneAndUpdate({ _id }, { eventComplete: true });
+            if (updateEvent) {
+              return res.status(200).json({ msg: "Event is complete", eventDetails });
+            } else {
+              return res.status(404).json({ msg: 'event not found', updateEvent })
+            }
+          } catch (error) {
+            return res.status(501).json({ msg: 'Event update time error', error })
+          }
+        } else {
+          return res.status(201).json({ msg: "Event is not complete", eventDetails });
+        }
       } else {
-        return res.status(200).json({ msg: "Event is not complete", eventDetails });
+        // If the current date is less than the event date, the event is not complete
+        return res.status(201).json({ msg: "Event is not complete", eventDetails });
       }
+
+      // return res.status(201).json({ msg: "Event is not complete", eventDetails });
     } else {
-      // If the current date is less than the event date, the event is not complete
-      return res.status(201).json({ msg: "Event is not complete", eventDetails });
+      return res.status(200).json({ msg: "Event is complete", eventDetails });
     }
   } catch (error) {
+    return res.status(501).json({ msg: "Internal server error", error });
+  }
+};
+
+// CHECK FOR APPLY BUTTON
+export const checkForApplyButton = async (req, res, next) => {
+  try {
+    const { _id } = req.body; // Extract event ID from the request body
+    const eventDetails = await EventModel.findById({
+      _id,
+    });
+
+    if (eventDetails.eventComplete === false) {
+
+      // Get event date and time from the database as Date object
+      const eventDateObj = new Date(eventDetails.date); // Assuming this is a Date object
+      const eventTime = eventDetails.time; // Assume it's in 'hh:mm AM/PM' format
+
+      // Get current date and time
+      const currentDate = new Date();
+      const currentDateString = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      const currentTimeString = convertTo12HourFormat(currentDate); // Convert current time to 12-hour format with AM/PM
+
+      // Format the event date to a string for comparison
+      const eventDateString = eventDateObj.toISOString().split("T")[0]; // Get YYYY-MM-DD format
+
+      // Compare the dates
+      if (currentDateString > eventDateString) {
+        // If the current date is greater than the event date, the event is complete
+        return res.status(200).json({ msg: "Event is complete", eventDetails });
+      } else if (currentDateString === eventDateString) {
+        // If dates are the same, compare the times
+        if (isCurrentTimeAfter(eventTime, currentTimeString)) {
+          try {
+            const updateEvent = await EventModel.findOneAndUpdate({ _id }, { eventComplete: true });
+            if (updateEvent) {
+              return res.status(200).json({ msg: "Event is complete", eventDetails });
+            } else {
+              return res.status(404).json({ msg: 'event not found', updateEvent })
+            }
+          } catch (error) {
+            return res.status(501).json({ msg: 'Event update time error', error })
+          }
+        } else {
+          return res.status(201).json({ msg: "Event is not complete", eventDetails });
+        }
+      } else {
+        // If the current date is less than the event date, the event is not complete
+        return res.status(201).json({ msg: "Event is not complete", eventDetails });
+      }
+
+    } else {
+      return res.status(200).json({ msg: "Event is complete", eventDetails });
+    }
+  } catch (error) {
+    console.log('i am event find time error');
     return res.status(501).json({ msg: "Internal server error", error });
   }
 };
