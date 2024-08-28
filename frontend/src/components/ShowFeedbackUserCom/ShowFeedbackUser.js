@@ -103,6 +103,8 @@ export default function SeeFeedback() {
     navigate('/updateFeedback',{state: {item}})
   }
 
+  console.log(feedback);
+
   return (
     <>
       <Suspense fallback={<div>Loading header...</div>}>
