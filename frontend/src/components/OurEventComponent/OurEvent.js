@@ -62,23 +62,10 @@ export default function OurEventComponent() {
   };
 
   // function for working work
-  const workingFun = () => {
-    Swal.fire({
-      title: "Work in Progress",
-      text: "We are currently working on this. Please check back later.",
-      icon: "info",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      allowEnterKey: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
+  const findUserFun = (event) => {
 
-    setTimeout(() => {
-      Swal.close();
-    }, 1000);
+    navigate('/userList', {state: {event}})
+
   };
 
   // Function to delete an event
@@ -292,7 +279,7 @@ export default function OurEventComponent() {
                   <td>
                     <button
                       onClick={() => {
-                        workingFun();
+                        findUserFun(event);
                       }}
                       className="btn btn-info btn-sm ps-2 pe-2">
                       View

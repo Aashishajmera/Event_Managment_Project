@@ -98,3 +98,21 @@ export const checkUserRegistration = async (req, res) => {
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  // CHECK HOW MANY USER REGISTER IN THIS EVENT
+export const getUserList = async (req, res, next) =>{
+  try {
+      const {_id} = req.body;
+
+      const userList = await UserEventDetailsModel.find({eventId: _id}).populate('eventId');
+
+      if(userList.length !== 0){
+        return res.status(201).json({msg: 'Userlist found', userList})
+      }else{
+        return res.status(203).json({msg: 'No user found for this event', userList})
+      }
+
+  } catch (error) {
+    return res.status(501).json({msg: 'Internal server error', error})
+  }
+}
