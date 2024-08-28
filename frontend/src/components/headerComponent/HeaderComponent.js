@@ -45,7 +45,7 @@ export default function HeaderComponent() {
         <>
             <nav className="navbar navbar-expand-lg navbar-light">
                 <div className="container-fluid">
-                    <Link className="navbar-brand fw-bold text-white">Wellcome {userName} !!</Link>
+                    <Link className="navbar-brand fw-bold text-white">Welcome {userName} !!</Link>
                     <button className="humber-btn navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span><i className="fas fa-bars"></i>
                         </span>
